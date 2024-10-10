@@ -93,25 +93,38 @@ class CuentaTest {
         banco.setNombre("Banco de la nacion");
 
         banco.transferir(cuentaOrigen, cuentaDestino, new BigDecimal(500));
-        assertEquals("2000", cuentaOrigen.getSaldo().toPlainString());
-        assertEquals("2000.8989", cuentaDestino.getSaldo().toPlainString());
+        assertAll(() -> {
+                    assertEquals("2000", cuentaOrigen.getSaldo().toPlainString());
+                },
+                () -> {
+                    assertEquals("2000.8989", cuentaDestino.getSaldo().toPlainString());
+                },
+                () -> {
+                    assertEquals(2, banco.getCuentas().size());
+                },
+                () -> {
+                    assertEquals("Banco de la nacion", cuentaOrigen.getBanco().getNombre());
+                },
+                () -> {
+                    assertEquals("Raul", banco.getCuentas().stream()
+                            .filter(c -> c.getPersona().equals("Raul"))
+                            .findFirst()
+                            .get()
+                            .getPersona()
+                    );
+                },
+                () -> {
+                    assertTrue(banco.getCuentas().stream()
+                            .filter(c -> c.getPersona().equals("Raul"))
+                            .findAny()
+                            .isPresent()
+                    );
+                },
+                () -> {
+                    assertTrue(banco.getCuentas().stream()
+                            .anyMatch(e -> e.getPersona().equals("Andres")));
+                });
 
-        assertEquals(2, banco.getCuentas().size());
-        assertEquals("Banco de la nacion", cuentaOrigen.getBanco().getNombre());
-        assertEquals("Raul", banco.getCuentas().stream()
-                .filter(c -> c.getPersona().equals("Raul"))
-                .findFirst()
-                .get()
-                .getPersona()
-        );
-        assertTrue(banco.getCuentas().stream()
-                .filter(c -> c.getPersona().equals("Raul"))
-                .findAny()
-                .isPresent()
-        );
-
-        assertTrue(banco.getCuentas().stream()
-                .anyMatch(e -> e.getPersona().equals("Andres")));
 
     }
 
