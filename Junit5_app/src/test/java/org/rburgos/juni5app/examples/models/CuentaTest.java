@@ -1,5 +1,7 @@
 package org.rburgos.juni5app.examples.models;
 
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.rburgos.juni5app.examples.exceptions.DineroInsuficienteException;
 
@@ -10,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class CuentaTest {
 
     @Test
+    @DisplayName("Probando nombre de la cuenta")
     void testNombreCuenta() {
         Cuenta cuenta = new Cuenta("Raul", new BigDecimal("1000.12345"));
         //cuenta.setPersona("Raul");
@@ -21,6 +24,7 @@ class CuentaTest {
     }
 
     @Test
+    @DisplayName("Que la cuenta tenga valor correcto, el saldo sea mayor a 0")
     void testSaldoCuenta() {
         Cuenta cuenta = new Cuenta("Raul", new BigDecimal("1000.12345"));
         assertNotNull(cuenta.getSaldo());
@@ -83,7 +87,11 @@ class CuentaTest {
     }
 
     @Test
+    @Disabled
+    @DisplayName("Probando relaciones entre las cuentas y el banco con assertAll")
     void testRelacionBancoCuentas() {
+        //para hacer fallar un metodo se usa fail()
+        fail();
         Cuenta cuentaOrigen = new Cuenta("Andres", new BigDecimal("2500"));
         Cuenta cuentaDestino = new Cuenta("Raul", new BigDecimal("1500.8989"));
 
