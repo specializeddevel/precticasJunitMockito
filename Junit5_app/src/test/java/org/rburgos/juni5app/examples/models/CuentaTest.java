@@ -94,7 +94,9 @@ class CuentaTest {
 
         banco.transferir(cuentaOrigen, cuentaDestino, new BigDecimal(500));
         assertAll(() -> {
-                    assertEquals("2000", cuentaOrigen.getSaldo().toPlainString());
+                    assertEquals("2000", cuentaOrigen.getSaldo().toPlainString(),
+                            () -> "El saldo no es correcto, se esperaba 2000" +
+                            " pero se recibio " + cuentaOrigen.getSaldo().toPlainString());
                 },
                 () -> {
                     assertEquals("2000.8989", cuentaDestino.getSaldo().toPlainString());
