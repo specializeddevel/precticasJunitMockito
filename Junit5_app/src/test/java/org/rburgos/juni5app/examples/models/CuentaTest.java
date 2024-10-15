@@ -35,6 +35,7 @@ class CuentaTest {
     }
 
     @Test
+    @DisplayName("Las cuentas deben ser iguales")
     void testReferenciaCuenta() {
         Cuenta cuenta = new Cuenta("Jon Doe", new BigDecimal("8900.9997"));
         Cuenta cuenta2 = new Cuenta("Jon Doe", new BigDecimal("8900.9997"));
@@ -45,6 +46,7 @@ class CuentaTest {
     }
 
     @Test
+    @DisplayName("Saldo no nulo, saldo entero menos 100, saldo float menos 100")
     void testDebitoCuenta() {
         Cuenta cuenta = new Cuenta("Andres", new BigDecimal("1000.12345"));
         cuenta.debito(new BigDecimal(100));
@@ -54,6 +56,7 @@ class CuentaTest {
     }
 
     @Test
+    @DisplayName("Saldo correcto en int y float")
     void testCreditoCuenta() {
         Cuenta cuenta = new Cuenta("Andres", new BigDecimal("1000.12345"));
         cuenta.credito(new BigDecimal(100));
@@ -63,6 +66,7 @@ class CuentaTest {
     }
 
     @Test
+    @DisplayName("Se lanza excepcion DineroInsuficienteException si no alcanza el saldo")
     void testDineroInsuficienteException() {
         Cuenta cuenta = new Cuenta("Andres", new BigDecimal("1000.12345"));
         Exception exception = assertThrows(DineroInsuficienteException.class, () -> {
@@ -74,6 +78,7 @@ class CuentaTest {
     }
 
     @Test
+    @DisplayName("Se transfiere de cuenta1 a cuenta2")
     void testTransferirDineroCuentas() {
         Cuenta cuentaOrigen = new Cuenta("Andres", new BigDecimal("2500"));
         Cuenta cuentaDestino = new Cuenta("Raul", new BigDecimal("1500.8989"));
@@ -107,7 +112,7 @@ class CuentaTest {
                             " pero se recibio " + cuentaOrigen.getSaldo().toPlainString());
                 },
                 () -> {
-                    assertEquals("2000.8989", cuentaDestino.getSaldo().toPlainString());
+                    assertEquals("2000.8989", cuentaDestino.getSaldo().toPlainString(), () -> "El saldo no es correcto");
                 },
                 () -> {
                     assertEquals(2, banco.getCuentas().size());
