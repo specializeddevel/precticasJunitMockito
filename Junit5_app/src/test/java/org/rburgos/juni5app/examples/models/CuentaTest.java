@@ -1,20 +1,44 @@
 package org.rburgos.juni5app.examples.models;
 
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.*;
 import org.rburgos.juni5app.examples.exceptions.DineroInsuficienteException;
 
 import java.math.BigDecimal;
+import java.util.Map;
+import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CuentaTest {
+
+    Cuenta cuenta;
+
+    @BeforeEach
+    void initMetodoTest() {
+        System.out.println("Metodo de inicializacion");
+        this.cuenta = new Cuenta("Raul", new BigDecimal("1000.12345"));
+    }
+
+    @AfterEach
+    void tearDown() {
+        System.out.println("Finalizando el metodo de prueba");
+    }
+
+    @BeforeAll
+    static void beforeAll() {
+        System.out.println("Inicializando el test (clase)");
+    }
+
+    @AfterAll
+    static void afterAll() {
+        System.out.println("Finalizando el test (clase)");
+    }
 
     @Test
     @DisplayName("Probando nombre de la cuenta")
     void testNombreCuenta() {
-        Cuenta cuenta = new Cuenta("Raul", new BigDecimal("1000.12345"));
         //cuenta.setPersona("Raul");
         String esperado = "Raul";
         String real = cuenta.getPersona();
@@ -26,7 +50,6 @@ class CuentaTest {
     @Test
     @DisplayName("Que la cuenta tenga valor correcto, el saldo sea mayor a 0")
     void testSaldoCuenta() {
-        Cuenta cuenta = new Cuenta("Raul", new BigDecimal("1000.12345"));
         assertNotNull(cuenta.getSaldo());
         assertEquals(1000.12345, cuenta.getSaldo().doubleValue());
         assertFalse(cuenta.getSaldo().compareTo(BigDecimal.ZERO) < 0);
@@ -37,7 +60,7 @@ class CuentaTest {
     @Test
     @DisplayName("Las cuentas deben ser iguales")
     void testReferenciaCuenta() {
-        Cuenta cuenta = new Cuenta("Jon Doe", new BigDecimal("8900.9997"));
+        cuenta = new Cuenta("Jon Doe", new BigDecimal("8900.9997"));
         Cuenta cuenta2 = new Cuenta("Jon Doe", new BigDecimal("8900.9997"));
 
 //        assertNotEquals(cuenta2, cuenta);
@@ -48,7 +71,6 @@ class CuentaTest {
     @Test
     @DisplayName("Saldo no nulo, saldo entero menos 100, saldo float menos 100")
     void testDebitoCuenta() {
-        Cuenta cuenta = new Cuenta("Andres", new BigDecimal("1000.12345"));
         cuenta.debito(new BigDecimal(100));
         assertNotNull(cuenta.getSaldo());
         assertEquals(900, cuenta.getSaldo().intValue());
@@ -58,7 +80,6 @@ class CuentaTest {
     @Test
     @DisplayName("Saldo correcto en int y float")
     void testCreditoCuenta() {
-        Cuenta cuenta = new Cuenta("Andres", new BigDecimal("1000.12345"));
         cuenta.credito(new BigDecimal(100));
         assertNotNull(cuenta.getSaldo());
         assertEquals(1100, cuenta.getSaldo().intValue());
@@ -68,7 +89,6 @@ class CuentaTest {
     @Test
     @DisplayName("Se lanza excepcion DineroInsuficienteException si no alcanza el saldo")
     void testDineroInsuficienteException() {
-        Cuenta cuenta = new Cuenta("Andres", new BigDecimal("1000.12345"));
         Exception exception = assertThrows(DineroInsuficienteException.class, () -> {
             cuenta.debito(new BigDecimal(1500));
         });
@@ -87,16 +107,14 @@ class CuentaTest {
         banco.transferir(cuentaOrigen, cuentaDestino, new BigDecimal(500));
         assertEquals("2000", cuentaOrigen.getSaldo().toPlainString());
         assertEquals("2000.8989", cuentaDestino.getSaldo().toPlainString());
-
-
     }
 
     @Test
-    @Disabled
+    //@Disabled
     @DisplayName("Probando relaciones entre las cuentas y el banco con assertAll")
     void testRelacionBancoCuentas() {
         //para hacer fallar un metodo se usa fail()
-        fail();
+        //fail();
         Cuenta cuentaOrigen = new Cuenta("Andres", new BigDecimal("2500"));
         Cuenta cuentaDestino = new Cuenta("Raul", new BigDecimal("1500.8989"));
 
@@ -139,8 +157,84 @@ class CuentaTest {
                     assertTrue(banco.getCuentas().stream()
                             .anyMatch(e -> e.getPersona().equals("Andres")));
                 });
+    }
 
+    @Test
+    @EnabledOnOs(OS.WINDOWS)
+    void testSoloWindows(){
 
     }
 
+    @Test
+    @EnabledOnOs({OS.LINUX, OS.MAC})
+    void testSoloMac(){
+
+    }
+
+    @Test
+    @DisabledOnOs(OS.WINDOWS)
+    void testNoWindows(){
+
+    }
+
+    @Test
+    @EnabledOnJre(JRE.JAVA_17)
+    void soloJDK17() {
+
+    }
+
+    @Test
+    @EnabledOnJre(JRE.JAVA_19)
+    void soloJDK19() {
+
+    }
+
+    @Test
+    @DisabledOnJre(JRE.JAVA_17)
+    void testNoJDK17() {
+
+    }
+
+    @Test
+    void imprimirSystemProperties() {
+        Properties properties = System.getProperties();
+        properties.forEach((k, v) -> System.out.println(k + "=" + v) );
+    }
+
+
+    @Test
+    @EnabledIfSystemProperty(named = "java.specification.version", matches = "21")
+    void testJavaVersion() {
+
+    }
+
+    @Test
+    @EnabledIfSystemProperty(named = "os.arch", matches = ".*32.*")
+    void testSoloArch32(){
+
+    }
+
+    @Test
+    @EnabledIfSystemProperty(named = "user.name", matches = "raulb")
+    void testSoloUserName(){
+
+    }
+
+    @Test
+    @EnabledIfSystemProperty(named = "ENV", matches = "dev")
+    void testSoloEnvDes(){
+
+    }
+
+    @Test
+    void imprimirVariablesAmbiente(){
+        Map<String, String> getenv = System.getenv();
+        getenv.forEach((k, v) -> System.out.println(k + "=" + v));
+    }
+
+    @Test
+    @EnabledIfEnvironmentVariable(named = "JD2_HOME", matches = ".*JDownloader 2.0*")
+    void testJd2Home(){
+
+    }
 }
