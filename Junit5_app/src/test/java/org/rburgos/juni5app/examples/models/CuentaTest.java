@@ -10,10 +10,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.rburgos.juni5app.examples.exceptions.DineroInsuficienteException;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
@@ -23,10 +25,21 @@ class CuentaTest {
 
     Cuenta cuenta;
 
+    //Atributos que se usaran para acceder a la informacion de estos desde los metodos
+    private TestInfo testInfo;
+    private TestReporter testReporter;
+
     @BeforeEach
-    void initMetodoTest() {
-        System.out.println("Metodo de inicializacion");
+        //DEPENDENCY INJECTION
+        //Inyectando TestInfo y TestReporter
+    void initMetodoTest(TestInfo testInfo, TestReporter reporter) {
+        //Asi se podran usar los valores dentro de los metodos
+        this.testReporter = reporter;
+        this.testInfo = testInfo;
+        //publishEntry Escribe en le log de Junit
+        testReporter.publishEntry("Inicializacion del metodo");
         this.cuenta = new Cuenta("Raul", new BigDecimal("1000.12345"));
+        testReporter.publishEntry("Ejecutando: " + testInfo.getDisplayName() + " metodo: " + testInfo.getTestMethod().get().getName() + " con las etiquetas: " + testInfo.getTags());
     }
 
     @AfterEach
@@ -50,14 +63,21 @@ class CuentaTest {
     @DisplayName("Probando atributos de la cuenta")
     class CuentaTestNombreSaldo {
         @Test
+        @Tag("cuenta")
         @DisplayName("el nombre")
-        void testNombreCuenta() {
+        void testNombreCuenta() throws InterruptedException {
+            testReporter.publishEntry(testInfo.getTags().toString());
+            if (testInfo.getTags().contains("cuenta")) {
+                testReporter.publishEntry("Haciendo algo por que esta presente la eqtiqueta cuenta");
+                TimeUnit.SECONDS.sleep(1);
+            }
             //cuenta.setPersona("Raul");
             String esperado = "Raul";
             String real = cuenta.getPersona();
             assertNotNull(real);
             assertEquals(esperado, real);
             assertTrue(real.equals("Raul"));
+            testReporter.publishEntry("Terminando el metodo");
         }
 
         @Test
@@ -84,6 +104,7 @@ class CuentaTest {
 
     @Nested
     class CuentaOperacionesTest {
+        @Tag("cuenta")
         @Test
         @DisplayName("Saldo no nulo, saldo entero menos 100, saldo float menos 100")
         void testDebitoCuenta() {
@@ -93,6 +114,7 @@ class CuentaTest {
             assertEquals("900.12345", cuenta.getSaldo().toPlainString());
         }
 
+        @Tag("cuenta")
         @Test
         @DisplayName("Saldo correcto en int y float")
         void testCreditoCuenta() {
@@ -103,6 +125,8 @@ class CuentaTest {
 
         }
 
+        @Tag("cuenta")
+        @Tag("banco")
         @Test
         @DisplayName("Se transfiere de cuenta1 a cuenta2")
         void testTransferirDineroCuentas() {
@@ -118,9 +142,9 @@ class CuentaTest {
     }
 
 
-
-
     @Test
+    @Tag("cuenta")
+    @Tag("error")
     @DisplayName("Se lanza excepcion DineroInsuficienteException si no alcanza el saldo")
     void testDineroInsuficienteException() {
         Exception exception = assertThrows(DineroInsuficienteException.class, () -> {
@@ -132,10 +156,11 @@ class CuentaTest {
     }
 
 
-
     @Test
     //@Disabled
     @DisplayName("Probando relaciones entre las cuentas y el banco con assertAll")
+    @Tag("cuenta")
+    @Tag("error")
     void testRelacionBancoCuentas() {
         //para hacer fallar un metodo se usa fail()
         //fail();
@@ -151,7 +176,7 @@ class CuentaTest {
         assertAll(() -> {
                     assertEquals("2000", cuentaOrigen.getSaldo().toPlainString(),
                             () -> "El saldo no es correcto, se esperaba 2000" +
-                            " pero se recibio " + cuentaOrigen.getSaldo().toPlainString());
+                                    " pero se recibio " + cuentaOrigen.getSaldo().toPlainString());
                 },
                 () -> {
                     assertEquals("2000.8989", cuentaDestino.getSaldo().toPlainString(), () -> "El saldo no es correcto");
@@ -187,19 +212,19 @@ class CuentaTest {
     class SistemaOperativoTest {
         @Test
         @EnabledOnOs(OS.WINDOWS)
-        void testSoloWindows(){
+        void testSoloWindows() {
 
         }
 
         @Test
         @EnabledOnOs({OS.LINUX, OS.MAC})
-        void testSoloMac(){
+        void testSoloMac() {
 
         }
 
         @Test
         @DisabledOnOs(OS.WINDOWS)
-        void testNoWindows(){
+        void testNoWindows() {
 
         }
     }
@@ -235,19 +260,19 @@ class CuentaTest {
 
         @Test
         @EnabledIfSystemProperty(named = "os.arch", matches = ".*32.*")
-        void testSoloArch32(){
+        void testSoloArch32() {
 
         }
 
         @Test
         @EnabledIfSystemProperty(named = "user.name", matches = "raulb")
-        void testSoloUserName(){
+        void testSoloUserName() {
 
         }
 
         @Test
         @EnabledIfSystemProperty(named = "ENV", matches = "dev")
-        void testSoloEnvDes(){
+        void testSoloEnvDes() {
 
         }
     }
@@ -255,21 +280,19 @@ class CuentaTest {
     @Test
     void imprimirSystemProperties() {
         Properties properties = System.getProperties();
-        properties.forEach((k, v) -> System.out.println(k + "=" + v) );
+        properties.forEach((k, v) -> System.out.println(k + "=" + v));
     }
 
 
-
-
     @Test
-    void imprimirVariablesAmbiente(){
+    void imprimirVariablesAmbiente() {
         Map<String, String> getenv = System.getenv();
         getenv.forEach((k, v) -> System.out.println(k + "=" + v));
     }
 
     @Test
     @EnabledIfEnvironmentVariable(named = "JD2_HOME", matches = ".*JDownloader 2.0*")
-    void testJd2Home(){
+    void testJd2Home() {
     }
 
     //assumeTrue
@@ -301,11 +324,12 @@ class CuentaTest {
     }
 
     //Test repetitivo
+    @Tag("cuenta")
     @DisplayName("Test saldo cuenta repetitivo")
     @RepeatedTest(value = 5, name = "{displayName} - Repeticion numero {currentRepetition} de {totalRepetitions}")
     void testDebitoCuentaRepeated(RepetitionInfo repetitionInfo) {
         //Se ejecuta de acuerdo a los valores de la repeticion que llega en repetitionInfo
-        if(repetitionInfo.getCurrentRepetition() == 3) {
+        if (repetitionInfo.getCurrentRepetition() == 3) {
             System.out.println("Estamos en la repeticion " + repetitionInfo.getCurrentRepetition());
         }
         cuenta.debito(new BigDecimal(100));
@@ -316,14 +340,15 @@ class CuentaTest {
 
     @Nested
     @DisplayName("Test parametrizados")
-    class parameterizedTests{
+    @Tag("parametrizadas")
+    class parameterizedTests {
 
         //VALUE
         //Test que toma valores de una fuente externa para el test
         @ParameterizedTest(name = "numero {index} ejecutando con {0} - {argumentsWithNames}")
         //Cuando se trabaja con Double se tiene menos precicion, es mejor trabajar con String
         //y Bigdecimal
-        @ValueSource(strings = {"100","200","300","500","700", "1000.12345"})
+        @ValueSource(strings = {"100", "200", "300", "500", "700", "1000.12345"})
         @DisplayName("Test Saldo positivo parametrizado")
         void testDebitoCuentaValueSource(String monto) {
             cuenta.debito(new BigDecimal(monto));
@@ -334,7 +359,7 @@ class CuentaTest {
 
         //CSV
         @ParameterizedTest(name = "numero {index} ejecutando con {0} - {argumentsWithNames}")
-        @CsvSource({"1,100","2,200","3,300","4,500","5,700", "6,1000.12344"})
+        @CsvSource({"1,100", "2,200", "3,300", "4,500", "5,700", "6,1000.12344"})
         @DisplayName("Test Saldo positivo parametrizado CSV")
         void testDebitoCuentaCsvSource(String index, String monto) {
             System.out.println(index + " -> " + monto);
@@ -346,7 +371,7 @@ class CuentaTest {
 
         //CSV 2
         @ParameterizedTest(name = "numero {index} ejecutando con {0} - {argumentsWithNames}")
-        @CsvSource({"200,100,John,Andres","250,200,Pepe,Pepe","300,300,maria,Maria","510,500,Pablo,Pablo","750,700,Lucas,Luca", "1000.12344,1000.12344,Raul,Raul"})
+        @CsvSource({"200,100,John,Andres", "250,200,Pepe,Pepe", "300,300,maria,Maria", "510,500,Pablo,Pablo", "750,700,Lucas,Luca", "1000.12344,1000.12344,Raul,Raul"})
         @DisplayName("Test Saldo positivo parametrizado CSV 2")
         void testDebitoCuentaCsvSource2(String saldo, String monto, String esperado, String actual) {
             System.out.println(saldo + " -> " + monto);
@@ -394,23 +419,48 @@ class CuentaTest {
             System.out.println(cuenta.getSaldo());
         }
 
-        //METHOD
-        @ParameterizedTest(name = "numero {index} ejecutando con {0} - {argumentsWithNames}")
-        @MethodSource("montoList")
-        @DisplayName("Test Saldo positivo parametrizado MethodSource")
-        void testDebitoCuentaMethodSource(String monto) {
-            System.out.println(monto);
-            cuenta.debito(new BigDecimal(monto));
-            assertNotNull(cuenta.getSaldo());
-            assertTrue(cuenta.getSaldo().compareTo(BigDecimal.ZERO) > 0);
-            System.out.println(cuenta.getSaldo());
-        }
 
-        static List<String> montoList() {
-            return Arrays.asList("100","200","300","500","700", "1000.12345");
-        }
     }
 
+    @Tag("parametrizadas")
+    //METHOD
+    @ParameterizedTest(name = "numero {index} ejecutando con {0} - {argumentsWithNames}")
+    @MethodSource("montoList")
+    @DisplayName("Test Saldo positivo parametrizado MethodSource")
+    void testDebitoCuentaMethodSource(String monto) {
+        System.out.println(monto);
+        cuenta.debito(new BigDecimal(monto));
+        assertNotNull(cuenta.getSaldo());
+        assertTrue(cuenta.getSaldo().compareTo(BigDecimal.ZERO) > 0);
+        System.out.println(cuenta.getSaldo());
+    }
 
+    static List<String> montoList() {
+        return Arrays.asList("100", "200", "300", "500", "700", "1000.12345");
+    }
+
+    @Nested
+    @Tag("timeout")
+    class EjemploTimeoutTest {
+
+        @Test
+        @Timeout(1)
+        void pruebaTimeout() throws InterruptedException {
+            TimeUnit.MILLISECONDS.sleep(100);
+        }
+
+        @Test
+        @Timeout(value = 1000, unit = TimeUnit.MILLISECONDS)
+        void pruebaTimeout2() throws InterruptedException {
+            TimeUnit.MILLISECONDS.sleep(900);
+        }
+
+        @Test
+        void testTimeoutAssertions() {
+            assertTimeout(Duration.ofSeconds(5), () -> {
+                TimeUnit.MILLISECONDS.sleep(4000);
+            });
+        }
+    }
 
 }
