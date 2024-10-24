@@ -7,6 +7,9 @@ import java.util.List;
 public class ExamenRepositoryImpl implements ExamenRepository {
     @Override
     public List<Examen> findAll() {
-        return List.of(new Examen(5L, "Matematicas"), new Examen(6L, "Lenguaje"), new Examen(7L, "Historia"));
+        return List.of(
+                new Examen(5L, "Matematicas"),
+                new Examen(6L, "Lenguaje"),
+                new Examen(7L, "Historia"));
     }
 }
