@@ -10,6 +10,11 @@ public class Datos {
             new Examen(6L, "Lenguaje"),
             new Examen(7L, "Historia"));
 
+    public final static List<Examen> EXAMENES_ID_NULL = List.of(
+            new Examen(null, "Matematicas"),
+            new Examen(null, "Lenguaje"),
+            new Examen(null, "Historia"));
+
     public final static List<String> PREGUNTAS = List.of(
             "aritmetica",
             "integrales",
@@ -17,4 +22,6 @@ public class Datos {
             "trigonometria",
             "geometria"
     );
+
+    public final static Examen EXAMEN = new Examen(null, "Fisica");
 }

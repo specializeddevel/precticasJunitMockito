@@ -38,5 +38,13 @@ public class ExamenServiceImpl implements ExamenService {
         return examen;
     }
 
+    @Override
+    public Examen guardar(Examen examen) {
+        if(!examen.getPreguntas().isEmpty()) {
+            preguntaRepository.guardarVariasPreguntas(examen.getPreguntas());
+        }
+        return examenRepository.guardarExamen(examen);
+    }
+
 
 }

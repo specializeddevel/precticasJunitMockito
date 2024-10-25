@@ -6,6 +6,11 @@ import java.util.List;
 
 public class ExamenRepositoryImpl implements ExamenRepository {
     @Override
+    public Examen guardarExamen(Examen examen) {
+        return null;
+    }
+
+    @Override
     public List<Examen> findAll() {
         return List.of(
                 new Examen(5L, "Matematicas"),
